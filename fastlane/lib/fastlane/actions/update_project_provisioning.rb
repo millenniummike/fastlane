@@ -40,6 +40,7 @@ module Fastlane
 
         target_filter = params[:target_filter] || params[:build_configuration_filter]
         configuration = params[:build_configuration]
+        identity = params[:code_sign_identity]
 
         # manipulate project file
         UI.success("Going to update project '#{folder}' with UUID")
@@ -65,6 +66,7 @@ module Fastlane
 
             build_configuration.build_settings["PROVISIONING_PROFILE"] = data["UUID"]
             build_configuration.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = data["Name"]
+            build_configuration.build_settings["CODE_SIGN_IDENTITY[sdk=iphoneos*]"] = identity
           end
         end
 
@@ -130,7 +132,11 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :certificate,
                                        env_name: "FL_PROJECT_PROVISIONING_CERTIFICATE_PATH",
                                        description: "Path to apple root certificate",
-                                       default_value: "/tmp/AppleIncRootCertificate.cer")
+                                       default_value: "/tmp/AppleIncRootCertificate.cer"),
+          FastlaneCore::ConfigItem.new(key: :code_sign_identity,
+                                      env_name: "FL_PROJECT_PROVISIONING_CODESIGN_IDENTITY",
+                                      description: "Code sign Identity",
+                                      default_value: "iPhone Developer")
         ]
       end
 
@@ -148,7 +154,8 @@ module Fastlane
             xcodeproj: "Project.xcodeproj",
             profile: "./watch_app_store.mobileprovision", # optional if you use sigh
             target_filter: ".*WatchKit Extension.*", # matches name or type of a target
-            build_configuration: "Release"
+            build_configuration: "Release",
+            code_sign_identity: "iPhone Distribution"
           )'
         ]
       end
